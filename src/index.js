@@ -1,11 +1,11 @@
 import React from 'react';
+import './styles.css';
 
 class Typeout extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            typewriterStrings: ["Fullstack Developer.", "Idea Maker.", "UX Architect."], // Array with strings to type in typewriter
             currentString: '' // Current string being displayed
         };
 
@@ -20,7 +20,7 @@ class Typeout extends React.Component {
 
     loopTypewriter(index) {
         // First make sure that the given index is valid
-        if (index >= this.state.typewriterStrings.length) {
+        if (index >= this.props.typewriterStrings.length) {
             index = 0;
         }
 
@@ -28,16 +28,18 @@ class Typeout extends React.Component {
         this.setState({ currentString: '' });
 
         // start a typewriter animation for the next string in the array
-        let string = this.state.typewriterStrings[index];
+        let string = this.props.typewriterStrings[index];
         this.typewriter(string, 0, index);
     }
 
     // types one character in the typwriter
     // keeps calling itself until the string is finished
     typewriter(string, index, wordIndex) {
+        const { delayBetweenLetters, delayBetweenWords } = this.props.config;
+
         if (index >= string.length) {
             // Reset the typewriter with the next string
-            setTimeout(this.loopTypewriter.bind(null, ++wordIndex), 2000);
+            setTimeout(this.loopTypewriter.bind(null, ++wordIndex), delayBetweenWords);
             return;
         }
 
@@ -46,13 +48,24 @@ class Typeout extends React.Component {
         this.setState({ currentString: displayString });
 
         // Wait a bit in between characters
-        setTimeout(this.typewriter.bind(null, string, ++index, wordIndex), 100);
+        setTimeout(this.typewriter.bind(null, string, ++index, wordIndex), delayBetweenLetters);
     }
 
     render() {
+        const { style, displayCaret, blinkCaret, caretType, caretStyle } = this.props.config;
         return (
-            <div>
-                {this.state.currentString} <span className="cursor">_</span>
+            <div style={style}>
+                {this.state.currentString} 
+                {displayCaret &&
+                    <span style={caretStyle}>
+                        {caretType === 'vertical' && 
+                            <span className={`vertical-caret ${blinkCaret ? 'blink' : ''}`}></span>
+                        }
+                        {caretType === 'underscore' &&
+                            <span className={blinkCaret ? 'blink' : ''}>_</span>
+                        }
+                    </span>
+                }
             </div>
         );
     }
